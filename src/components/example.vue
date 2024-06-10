@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import api from '../services/api';
+
 export default {
   data() {
     return {
@@ -19,14 +21,13 @@ export default {
     this.fetchTasks();
   },
   methods: {
-    fetchTasks() {
-      // Assuming you have an endpoint to fetch tasks
-      fetch('http://localhost:8080/api/tasks')
-          .then(response => response.json())
-          .then(data => {
-            this.tasks = data;
-          })
-          .catch(error => console.error('Error fetching tasks:', error));
+    async fetchTasks() {
+      try {
+        const response = await api.get('/tasks');
+        this.tasks = response.data;
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
     }
   }
 }
