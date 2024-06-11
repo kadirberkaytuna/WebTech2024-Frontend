@@ -29,7 +29,7 @@ export default {
     // Diğer API istekleri için metodlar ekleyin
 };
 
-**/
+
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -43,6 +43,30 @@ export default {
     getData() {
         return apiClient.get( '/data');
     },
+    getTasks() {
+        return apiClient.get( '/tasks');
+    },
+    createTask(task) {
+        return apiClient.post('/tasks', task);
+    },
+    updateTask(id, task) {
+        return apiClient.put(`/tasks/${id}`, task);
+    },
+    deleteTask(id) {
+        return apiClient.delete(`/tasks/${id}`);
+    }
+};
+**/
+import axios from 'axios';
+
+const apiClient = axios.create({
+    baseURL: import.meta.env.VITE_APP_API_URL, // Stellen Sie sicher, dass die Umgebungsvariable korrekt gesetzt ist
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+export default {
     getTasks() {
         return apiClient.get('/tasks');
     },
