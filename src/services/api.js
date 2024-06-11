@@ -6,11 +6,11 @@ const API_URL = 'http://localhost:8080';
 export function getTasks() {
     return axios.get(`${API_URL}/tasks`);
 }
- **/
+
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'https://webtech24-backend-1.onrender.com/api', // Backend API URL'inizi buraya yazın
+    baseURL: 'http://localhost:8081/tasks', // Backend API URL'inizi buraya yazın
     headers: {
         'Content-Type': 'application/json'
     }
@@ -29,3 +29,30 @@ export default {
     // Diğer API istekleri için metodlar ekleyin
 };
 
+**/
+import axios from 'axios';
+
+const apiClient = axios.create({
+    baseURL: import.meta.env.VITE_APP_API_URL, // Verwenden Sie die Umgebungsvariable
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+export default {
+    getData() {
+        return apiClient.get( '/data');
+    },
+    getTasks() {
+        return apiClient.get('/tasks');
+    },
+    createTask(task) {
+        return apiClient.post('/tasks', task);
+    },
+    updateTask(id, task) {
+        return apiClient.put(`/tasks/${id}`, task);
+    },
+    deleteTask(id) {
+        return apiClient.delete(`/tasks/${id}`);
+    }
+};

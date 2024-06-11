@@ -5,26 +5,67 @@
       <h3 class="task-title">{{ task.title }}</h3>
       <p class="task-description">{{ task.description }}</p>
       <p class="task-status">Status: <strong>{{ task.done ? 'Completed' : 'Pending' }}</strong></p>
-      <p class="task-due-date">Due Date: {{ task.dueDate.toLocaleDateString() }}</p>
+      <p class="task-due-date">Due Date: {{ new Date(task.dueDate).toLocaleDateString() }}</p>
       <button class="task-button" @click="toggleTaskStatus(task)">Mark as {{ task.done ? 'Pending' : 'Completed' }}</button>
+    </div>
+    <div class="new-task-form">
+      <input v-model="newTask.title" placeholder="Title" />
+      <input v-model="newTask.description" placeholder="Description" />
+      <input v-model="newTask.dueDate" type="date" />
+      <button class="task-button" @click="createTask">Add Task</button>
     </div>
   </div>
 </template>
 
 <script>
+import api from '@/services/api';
+
 export default {
   name: 'TaskManager',
   data() {
     return {
-      tasks: [
-        { id: 1, title: 'Task 1', description: 'Description of Task 1', done: false, dueDate: new Date(2024, 4, 15) },
-        { id: 2, title: 'Task 2', description: 'Description of Task 2', done: true, dueDate: new Date(2024, 4, 18) }
-      ]
+      tasks: [],
+      newTask: {
+        title: '',
+        description: '',
+        dueDate: ''
+      }
     };
   },
+  created() {
+    this.fetchTasks();
+  },
   methods: {
+    fetchTasks() {
+      api.getTasks().then(response => {
+        this.tasks = response.data;
+      }).catch(error => {
+        console.error("Fehler beim Abrufen der Aufgaben:", error);
+      });
+    },
     toggleTaskStatus(task) {
       task.done = !task.done;
+      api.updateTask(task.id, task).then(() => { // `response` entfernt
+        this.fetchTasks(); // Aufgaben neu laden, nachdem sie aktualisiert wurden
+      }).catch(error => {
+        console.error("Fehler beim Aktualisieren der Aufgabe:", error);
+      });
+    },
+    createTask() {
+      const task = {
+        title: this.newTask.title,
+        description: this.newTask.description,
+        done: false,
+        dueDate: this.newTask.dueDate
+      };
+      api.createTask(task).then(() => { // `response` entfernt
+        this.newTask.title = '';
+        this.newTask.description = '';
+        this.newTask.dueDate = '';
+        this.fetchTasks(); // Aufgaben neu laden, nachdem eine neue hinzugefügt wurde
+      }).catch(error => {
+        console.error("Fehler beim Erstellen der Aufgabe:", error);
+      });
     }
   }
 }
@@ -54,6 +95,28 @@ export default {
 }
 
 .task-button {
+  background-color: #2c3e50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.new-task-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.new-task-form input {
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 1em;
+}
+
+.new-task-form button {
   background-color: #2c3e50;
   color: white;
   padding: 10px 20px;
