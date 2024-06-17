@@ -60,7 +60,7 @@ export default {
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_APP_API_URL, // Stellen Sie sicher, dass die Umgebungsvariable korrekt gesetzt ist
+    baseURL: import.meta.env.VITE_APP_API_URL + '/api/tasks', // Stellen Sie sicher, dass die Umgebungsvariable korrekt gesetzt ist
     headers: {
         'Content-Type': 'application/json'
     }
