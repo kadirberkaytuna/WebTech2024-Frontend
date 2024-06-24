@@ -13,8 +13,7 @@
       <input v-model="newTask.id" placeholder="Id" />
       <input v-model="newTask.title" placeholder="Title" />
       <input v-model="newTask.description" placeholder="Description" />
-      <input v-model="newTask.status" placeholder="Status" />
-      <input v-model="newTask.dueDate" type="Date" />
+      <input v-model="newTask.dueDate" type="date" />
       <button class="task-button" @click="createTask">Add Task</button>
     </div>
   </div>
@@ -33,7 +32,7 @@ export default {
         title: '',
         description: '',
         dueDate: '',
-        status: ''
+        done: false
       }
     };
   },
@@ -45,15 +44,15 @@ export default {
       api.getTasks().then(response => {
         this.tasks = response.data;
       }).catch(error => {
-        console.error("Fehler beim Abrufen der Aufgaben:", error);
+        console.error("Error fetching tasks:", error);
       });
     },
     toggleTaskStatus(task) {
       task.done = !task.done;
-      api.updateTask(task.id, task).then(() => { // `response` entfernt
-        this.fetchTasks(); // Aufgaben neu laden, nachdem sie aktualisiert wurden
+      api.updateTask(task.id, task).then(() => {
+        this.fetchTasks();
       }).catch(error => {
-        console.error("Fehler beim Aktualisieren der Aufgabe:", error);
+        console.error("Error updating task:", error);
       });
     },
     createTask() {
@@ -61,18 +60,18 @@ export default {
         id: this.newTask.id,
         title: this.newTask.title,
         description: this.newTask.description,
-        done: this.newTask.status,
+        done: this.newTask.done,
         dueDate: this.newTask.dueDate
       };
-      api.createTask(task).then(() => { // `response` entfernt
+      api.createTask(task).then(() => {
         this.newTask.id = '';
         this.newTask.title = '';
         this.newTask.description = '';
         this.newTask.dueDate = '';
-        this.newTask.status = '';
-        this.fetchTasks(); // Aufgaben neu laden, nachdem eine neue hinzugefügt wurde
+        this.newTask.done = false;
+        this.fetchTasks();
       }).catch(error => {
-        console.error("Fehler beim Erstellen der Aufgabe:", error);
+        console.error("Error creating task:", error);
       });
     }
   }
