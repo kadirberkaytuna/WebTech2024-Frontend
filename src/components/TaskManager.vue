@@ -13,7 +13,8 @@
       <input v-model="newTask.id" placeholder="Id" />
       <input v-model="newTask.title" placeholder="Title" />
       <input v-model="newTask.description" placeholder="Description" />
-      <input v-model="newTask.dueDate" type="date" />
+      <input v-model="newTask.status" placeholder="Status" />
+      <input v-model="newTask.dueDate" type="Date" />
       <button class="task-button" @click="createTask">Add Task</button>
     </div>
   </div>
@@ -32,7 +33,7 @@ export default {
         title: '',
         description: '',
         dueDate: '',
-        done: false
+        status: ''
       }
     };
   },
@@ -44,15 +45,15 @@ export default {
       api.getTasks().then(response => {
         this.tasks = response.data;
       }).catch(error => {
-        console.error("Error fetching tasks:", error);
+        console.error("Fehler beim Abrufen der Aufgaben:", error);
       });
     },
     toggleTaskStatus(task) {
       task.done = !task.done;
-      api.updateTask(task.id, task).then(() => {
-        this.fetchTasks();
+      api.updateTask(task.id, task).then(() => { // `response` entfernt
+        this.fetchTasks(); // Aufgaben neu laden, nachdem sie aktualisiert wurden
       }).catch(error => {
-        console.error("Error updating task:", error);
+        console.error("Fehler beim Aktualisieren der Aufgabe:", error);
       });
     },
     createTask() {
@@ -60,18 +61,18 @@ export default {
         id: this.newTask.id,
         title: this.newTask.title,
         description: this.newTask.description,
-        done: this.newTask.done,
+        done: this.newTask.status,
         dueDate: this.newTask.dueDate
       };
-      api.createTask(task).then(() => {
+      api.createTask(task).then(() => { // `response` entfernt
         this.newTask.id = '';
         this.newTask.title = '';
         this.newTask.description = '';
         this.newTask.dueDate = '';
-        this.newTask.done = false;
-        this.fetchTasks();
+        this.newTask.status = '';
+        this.fetchTasks(); // Aufgaben neu laden, nachdem eine neue hinzugefügt wurde
       }).catch(error => {
-        console.error("Error creating task:", error);
+        console.error("Fehler beim Erstellen der Aufgabe:", error);
       });
     }
   }
