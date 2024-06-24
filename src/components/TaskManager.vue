@@ -3,18 +3,15 @@
     <h1 class="title">Task Manager</h1>
     <div class="task-card" v-for="task in tasks" :key="task.id">
       <h3 class="task-title">{{ task.title }}</h3>
-      <p class="task-id">{{ task.id }}</p>
       <p class="task-description">{{ task.description }}</p>
       <p class="task-status">Status: <strong>{{ task.done ? 'Completed' : 'Pending' }}</strong></p>
       <p class="task-due-date">Due Date: {{ new Date(task.dueDate).toLocaleDateString() }}</p>
       <button class="task-button" @click="toggleTaskStatus(task)">Mark as {{ task.done ? 'Pending' : 'Completed' }}</button>
     </div>
     <div class="new-task-form">
-      <input v-model="newTask.id" placeholder="Id" />
       <input v-model="newTask.title" placeholder="Title" />
       <input v-model="newTask.description" placeholder="Description" />
-      <input v-model="newTask.status" placeholder="Status" />
-      <input v-model="newTask.dueDate" type="Date" />
+      <input v-model="newTask.dueDate" type="date" />
       <button class="task-button" @click="createTask">Add Task</button>
     </div>
   </div>
@@ -29,11 +26,9 @@ export default {
     return {
       tasks: [],
       newTask: {
-        id: '',
         title: '',
         description: '',
-        dueDate: '',
-        status: ''
+        dueDate: ''
       }
     };
   },
@@ -58,18 +53,15 @@ export default {
     },
     createTask() {
       const task = {
-        id: this.newTask.id,
         title: this.newTask.title,
         description: this.newTask.description,
-        done: this.newTask.status,
+        done: false,
         dueDate: this.newTask.dueDate
       };
       api.createTask(task).then(() => { // `response` entfernt
-        this.newTask.id = '';
         this.newTask.title = '';
         this.newTask.description = '';
         this.newTask.dueDate = '';
-        this.newTask.status = '';
         this.fetchTasks(); // Aufgaben neu laden, nachdem eine neue hinzugefügt wurde
       }).catch(error => {
         console.error("Fehler beim Erstellen der Aufgabe:", error);
