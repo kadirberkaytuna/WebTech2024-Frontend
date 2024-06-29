@@ -1,12 +1,18 @@
 <template>
   <div class="task-manager">
     <h1 class="title">Task Manager</h1>
+    <div class="task-filter">
+      <button @click="filterTasks('all')">All</button>
+      <button @click="filterTasks('completed')">Completed</button>
+      <button @click="filterTasks('pending')">Pending</button>
+    </div>
     <div class="task-card" v-for="task in tasks" :key="task.id">
       <h3 class="task-title">{{ task.title }}</h3>
       <p class="task-description">{{ task.description }}</p>
       <p class="task-status">Status: <strong>{{ task.done ? 'Completed' : 'Pending' }}</strong></p>
       <p class="task-due-date">Due Date: {{ new Date(task.dueDate).toLocaleDateString() }}</p>
       <button class="task-button" @click="toggleTaskStatus(task)">Mark as {{ task.done ? 'Pending' : 'Completed' }}</button>
+      <button class="task-button" @click="deleteTask(task.id)">Delete</button>
     </div>
     <div class="new-task-form">
       <input v-model="newTask.title" placeholder="Title" />
@@ -40,15 +46,26 @@ export default {
       api.getTasks().then(response => {
         this.tasks = response.data;
       }).catch(error => {
-        console.error("Fehler beim Abrufen der Aufgaben:", error);
+        console.error("Error fetching tasks:", error);
       });
+    },
+    filterTasks(status) {
+      if (status === 'all') {
+        this.fetchTasks();
+      } else {
+        api.filterTasks(status).then(response => {
+          this.tasks = response.data;
+        }).catch(error => {
+          console.error("Error filtering tasks:", error);
+        });
+      }
     },
     toggleTaskStatus(task) {
       task.done = !task.done;
-      api.updateTask(task.id, task).then(() => { // `response` entfernt
-        this.fetchTasks(); // Aufgaben neu laden, nachdem sie aktualisiert wurden
+      api.updateTask(task.id, task).then(() => {
+        this.fetchTasks();
       }).catch(error => {
-        console.error("Fehler beim Aktualisieren der Aufgabe:", error);
+        console.error("Error updating task:", error);
       });
     },
     createTask() {
@@ -58,13 +75,20 @@ export default {
         done: false,
         dueDate: this.newTask.dueDate
       };
-      api.createTask(task).then(() => { // `response` entfernt
+      api.createTask(task).then(() => {
         this.newTask.title = '';
         this.newTask.description = '';
         this.newTask.dueDate = '';
-        this.fetchTasks(); // Aufgaben neu laden, nachdem eine neue hinzugefügt wurde
+        this.fetchTasks();
       }).catch(error => {
-        console.error("Fehler beim Erstellen der Aufgabe:", error);
+        console.error("Error creating task:", error);
+      });
+    },
+    deleteTask(id) {
+      api.deleteTask(id).then(() => {
+        this.fetchTasks();
+      }).catch(error => {
+        console.error("Error deleting task:", error);
       });
     }
   }
@@ -80,6 +104,17 @@ export default {
 .title {
   text-align: center;
   color: #2c3e50;
+}
+
+.task-filter {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.task-filter button {
+  margin: 0 5px;
+  padding: 10px 20px;
+  cursor: pointer;
 }
 
 .task-card {
@@ -101,6 +136,7 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-right: 5px;
 }
 
 .new-task-form {

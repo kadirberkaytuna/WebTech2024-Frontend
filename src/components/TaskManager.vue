@@ -1,24 +1,25 @@
 <template>
   <div class="task-manager">
     <h1 class="title">Task Manager</h1>
-    <div class="task-filter">
-      <button @click="filterTasks('all')">All</button>
-      <button @click="filterTasks('completed')">Completed</button>
-      <button @click="filterTasks('pending')">Pending</button>
+    <div class="filter-buttons">
+      <button class="filter-button" @click="filterTasks('all')">All</button>
+      <button class="filter-button" @click="filterTasks('completed')">Completed</button>
+      <button class="filter-button" @click="filterTasks('pending')">Pending</button>
     </div>
-    <div class="task-card" v-for="task in tasks" :key="task.id">
+    <div class="task-card" v-for="task in filteredTasks" :key="task.id">
       <h3 class="task-title">{{ task.title }}</h3>
       <p class="task-description">{{ task.description }}</p>
       <p class="task-status">Status: <strong>{{ task.done ? 'Completed' : 'Pending' }}</strong></p>
       <p class="task-due-date">Due Date: {{ new Date(task.dueDate).toLocaleDateString() }}</p>
       <button class="task-button" @click="toggleTaskStatus(task)">Mark as {{ task.done ? 'Pending' : 'Completed' }}</button>
+      <button class="task-button" @click="editTask(task)">Edit</button>
       <button class="task-button" @click="deleteTask(task.id)">Delete</button>
     </div>
     <div class="new-task-form">
       <input v-model="newTask.title" placeholder="Title" />
       <input v-model="newTask.description" placeholder="Description" />
       <input v-model="newTask.dueDate" type="date" />
-      <button class="task-button" @click="createTask">Add Task</button>
+      <button class="task-button" @click="createOrUpdateTask">{{ isEditing ? 'Update Task' : 'Add Task' }}</button>
     </div>
   </div>
 </template>
@@ -35,8 +36,19 @@ export default {
         title: '',
         description: '',
         dueDate: ''
-      }
+      },
+      isEditing: false,
+      editTaskId: null,
+      filterStatus: 'all'
     };
+  },
+  computed: {
+    filteredTasks() {
+      if (this.filterStatus === 'all') {
+        return this.tasks;
+      }
+      return this.tasks.filter(task => this.filterStatus === 'completed' ? task.done : !task.done);
+    }
   },
   created() {
     this.fetchTasks();
@@ -49,17 +61,6 @@ export default {
         console.error("Error fetching tasks:", error);
       });
     },
-    filterTasks(status) {
-      if (status === 'all') {
-        this.fetchTasks();
-      } else {
-        api.filterTasks(status).then(response => {
-          this.tasks = response.data;
-        }).catch(error => {
-          console.error("Error filtering tasks:", error);
-        });
-      }
-    },
     toggleTaskStatus(task) {
       task.done = !task.done;
       api.updateTask(task.id, task).then(() => {
@@ -68,21 +69,29 @@ export default {
         console.error("Error updating task:", error);
       });
     },
-    createTask() {
-      const task = {
-        title: this.newTask.title,
-        description: this.newTask.description,
-        done: false,
-        dueDate: this.newTask.dueDate
-      };
-      api.createTask(task).then(() => {
-        this.newTask.title = '';
-        this.newTask.description = '';
-        this.newTask.dueDate = '';
-        this.fetchTasks();
-      }).catch(error => {
-        console.error("Error creating task:", error);
-      });
+    createOrUpdateTask() {
+      if (this.isEditing) {
+        api.updateTask(this.editTaskId, this.newTask).then(() => {
+          this.isEditing = false;
+          this.editTaskId = null;
+          this.resetNewTask();
+          this.fetchTasks();
+        }).catch(error => {
+          console.error("Error updating task:", error);
+        });
+      } else {
+        api.createTask(this.newTask).then(() => {
+          this.resetNewTask();
+          this.fetchTasks();
+        }).catch(error => {
+          console.error("Error creating task:", error);
+        });
+      }
+    },
+    editTask(task) {
+      this.isEditing = true;
+      this.editTaskId = task.id;
+      this.newTask = { ...task };
     },
     deleteTask(id) {
       api.deleteTask(id).then(() => {
@@ -90,6 +99,16 @@ export default {
       }).catch(error => {
         console.error("Error deleting task:", error);
       });
+    },
+    resetNewTask() {
+      this.newTask = {
+        title: '',
+        description: '',
+        dueDate: ''
+      };
+    },
+    filterTasks(status) {
+      this.filterStatus = status;
     }
   }
 }
@@ -106,15 +125,20 @@ export default {
   color: #2c3e50;
 }
 
-.task-filter {
-  text-align: center;
+.filter-buttons {
+  display: flex;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
-.task-filter button {
-  margin: 0 5px;
+.filter-button {
+  background-color: #2c3e50;
+  color: white;
   padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+  margin: 0 10px;
 }
 
 .task-card {
@@ -136,7 +160,7 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-right: 5px;
+  margin-right: 10px;
 }
 
 .new-task-form {
