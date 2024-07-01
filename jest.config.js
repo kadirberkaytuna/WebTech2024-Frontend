@@ -1,15 +1,9 @@
-"jest": {
-    "moduleFileExtensions": [
-        "js",
-        "json",
-        "vue"
-    ],
-        "transform": {
-        ".*\\.(vue)$": "vue-jest",
-            ".*\\.(js)$": "babel-jest"
+module.exports = {
+    testEnvironment: 'node',
+    roots: ['<rootDir>/src'],
+    transform: {
+        '^.+\\.jsx?$': 'babel-jest',
+        '^.+\\.tsx?$': 'ts-jest',
     },
-    "moduleNameMapper": {
-        "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "testEnvironment": "jsdom"
-}
+    moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node'],
+};
